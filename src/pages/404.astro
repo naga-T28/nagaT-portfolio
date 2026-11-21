@@ -1,0 +1,24 @@
+---
+import PageHero from '../components/PageHero.astro';
+import TextLink from '../components/TextLink.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getNotFoundPage } from '../lib/content';
+
+const { data } = await getNotFoundPage('ja');
+const { data: en } = await getNotFoundPage('en');
+---
+
+<BaseLayout title={data.title} description={data.description} noindex>
+  <PageHero title={data.heading} lead={data.lead}>
+    <p><TextLink href="/">{data.linkLabel}</TextLink></p>
+    <p class="en" lang="en">{en.lead}</p>
+    <p lang="en"><TextLink href="/en/">{en.linkLabel}</TextLink></p>
+  </PageHero>
+</BaseLayout>
+
+<style>
+  .en {
+    margin-top: var(--space-lg);
+    font-size: var(--text-lead);
+  }
+</style>

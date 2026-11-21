@@ -1,0 +1,42 @@
+---
+import SectionHead from './SectionHead.astro';
+import TextLink from './TextLink.astro';
+import { getContactPage, getHomePage } from '../lib/content';
+import { langOf, localize } from '../lib/i18n';
+
+const lang = langOf(Astro.url);
+const { data } = await getContactPage(lang);
+const { data: home } = await getHomePage(lang);
+const email = (await getContactPage('ja')).data.email;
+const homeLinks = data.links.filter((link) => link.showOnHome);
+---
+
+<!-- The colour reaches the screen edges while the text stays in the centred column. -->
+<section class="contact">
+  <div class="frame inner">
+    <SectionHead title={data.title} />
+    <p>{data.lead}</p>
+    <ul class="links">
+      {email && <li><TextLink href={`mailto:${email}`}>Email</TextLink></li>}
+      {homeLinks.map((link) => <li><TextLink href={link.href}>{link.label}</TextLink></li>)}
+      <li><TextLink href={localize('/contact/', lang)}>{home.contactLink}</TextLink></li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .contact {
+    background: var(--color-paper-2);
+  }
+
+  .inner {
+    padding-block: var(--section-gap);
+  }
+
+  .links {
+    margin-top: var(--space-lg);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-lg);
+  }
+</style>

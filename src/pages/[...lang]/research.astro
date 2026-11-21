@@ -1,0 +1,63 @@
+---
+import { render } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
+import TextLink from '../../components/TextLink.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getProjects, getProjectsPage, getResearchPage, projectSlug } from '../../lib/content';
+import { langOf, languagePaths, localize } from '../../lib/i18n';
+
+export const getStaticPaths = languagePaths;
+
+const lang = langOf(Astro.url);
+const page = await getResearchPage(lang);
+const { data: labels } = await getProjectsPage(lang);
+const { data } = page;
+const { Content } = await render(page);
+const related = (await getProjects(lang)).filter((project) => data.related.includes(projectSlug(project)));
+---
+
+<BaseLayout title={data.title} description={data.description}>
+  <PageHero title={data.title} lead={data.theme} />
+
+  <div class="frame page-body">
+    <section>
+      <h2 class="subhead">{data.summaryHeading}</h2>
+      <p>{data.summary}</p>
+    </section>
+
+    <div class="md">
+      <Content />
+    </div>
+
+    {
+      related.length > 0 && (
+        <section>
+          <h2 class="subhead">{data.relatedHeading}</h2>
+          <ul class="related">
+            {related.map((project) => (
+              <li>
+                <h3>{project.data.title}</h3>
+                <p>{project.data.summary}</p>
+                <TextLink href={localize(`/projects/${projectSlug(project)}/`, lang)}>{labels.viewLabel}</TextLink>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .related li {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-xs);
+  }
+
+  .related h3 {
+    font-size: var(--text-body);
+    font-weight: 700;
+    line-height: 1.6;
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+import { morseBars } from '../lib/morse';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+const { bars, total } = morseBars();
+---
+
+<svg
+  class:list={['morse', className]}
+  viewBox={`0 0 ${total} 10`}
+  preserveAspectRatio="none"
+  fill="currentColor"
+  aria-hidden="true"
+>
+  {bars.map((bar) => <rect x={bar.x} width={bar.width} height="10" />)}
+</svg>
+
+<style>
+  .morse {
+    width: 4.5rem;
+    height: 1.125rem;
+    flex: none;
+  }
+</style>

@@ -1,0 +1,26 @@
+---
+import PageHero from '../../../components/PageHero.astro';
+import ProjectRow from '../../../components/ProjectRow.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getProjects, getProjectsPage } from '../../../lib/content';
+import { langOf, languagePaths } from '../../../lib/i18n';
+
+export const getStaticPaths = languagePaths;
+
+const lang = langOf(Astro.url);
+const { data } = await getProjectsPage(lang);
+const projects = await getProjects(lang);
+---
+
+<BaseLayout title={data.title} description={data.description}>
+  <PageHero title={data.title} lead={data.lead} />
+  <div class="frame list">
+    {projects.map((project) => <ProjectRow project={project} showStack headingLevel="h2" />)}
+  </div>
+</BaseLayout>
+
+<style>
+  .list {
+    padding-block: var(--space-xl) var(--section-gap);
+  }
+</style>

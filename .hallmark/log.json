@@ -1,0 +1,13 @@
+[
+  {
+    "date": "2026-11-06",
+    "macrostructure": "custom (bespoke, from user reference)",
+    "theme": "custom",
+    "theme_axes": "light / display-heavy / neutral",
+    "vibe": "monochrome typography geometry subtle motion",
+    "enrichment": "E5 hand-built SVG",
+    "nav": "N1b-style masthead with full-screen mobile menu",
+    "footer": "Signature line with Morse rule",
+    "brief": "NAGA personal portfolio, Astro static site for Xserver"
+  }
+]

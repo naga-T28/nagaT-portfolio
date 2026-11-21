@@ -1,0 +1,113 @@
+---
+import { render } from 'astro:content';
+import AboutPreview from '../../components/AboutPreview.astro';
+import ContactPreview from '../../components/ContactPreview.astro';
+import Hero from '../../components/Hero.astro';
+import ProjectRow from '../../components/ProjectRow.astro';
+import ResearchPreview from '../../components/ResearchPreview.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import SoundBar from '../../components/SoundBar.astro';
+import TextLink from '../../components/TextLink.astro';
+import { siteUrl } from '../../data/site';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getContactPage, getHomePage, getProjects, getProjectsPage, getSite } from '../../lib/content';
+import { langOf, languagePaths, localize } from '../../lib/i18n';
+
+export const getStaticPaths = languagePaths;
+
+const lang = langOf(Astro.url);
+const page = await getHomePage(lang);
+const { data: site } = await getSite(lang);
+const { data: contact } = await getContactPage(lang);
+const { data: projectsPage } = await getProjectsPage(lang);
+const { Content } = await render(page);
+const featuredProjects = (await getProjects(lang)).filter((project) => project.data.featured);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  alternateName: 'NAGA-T',
+  url: siteUrl,
+  sameAs: contact.links.map((link) => link.href),
+};
+---
+
+<BaseLayout description={page.data.description} jsonLd={jsonLd}>
+  <!-- Header, hero and player fill the screen exactly: the hero's lines stretch to take up the height. -->
+  <div class="first-view">
+    <Hero />
+    <SoundBar />
+  </div>
+
+  <section class="frame intro" id="intro">
+    <Content />
+  </section>
+
+  <AboutPreview />
+
+  <section class="frame projects">
+    <SectionHead title={projectsPage.title} />
+    <div>
+      {featuredProjects.map((project) => <ProjectRow project={project} />)}
+    </div>
+    <p class="all">
+      <TextLink href={localize('/projects/', lang)}>{page.data.projectsLink}</TextLink>
+    </p>
+  </section>
+
+  <ResearchPreview />
+
+  <ContactPreview />
+</BaseLayout>
+
+<style>
+  .first-view {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--header-height));
+    /* The player ends at the bottom of the visible screen. The padding is only what a phone's
+       toolbars can give back when they shrink, and it keeps the next section out of that space. */
+    min-height: calc(100lvh - var(--header-height));
+    padding-bottom: calc(100lvh - 100svh);
+  }
+
+  .intro {
+    display: grid;
+    gap: var(--space-md);
+    padding-block: var(--section-gap);
+    scroll-margin-top: var(--space-xl);
+  }
+
+  .intro :global(h2) {
+    font-size: clamp(1.5rem, 1.2rem + 1.6vw, 2.25rem);
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .intro :global(p) {
+    font-size: var(--text-lead);
+  }
+
+  .projects {
+    padding-block: var(--section-gap);
+  }
+
+  .all {
+    max-width: none;
+    padding-top: var(--space-md);
+    border-top: var(--rule-thin) solid var(--color-ink);
+  }
+</style>
+
+<script>
+  // Reloading starts from the first view again, even after scrolling or following the #intro link.
+  const [navigation] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+  if (navigation?.type === 'reload') {
+    history.scrollRestoration = 'manual';
+    if (location.hash) history.replaceState(history.state, '', location.pathname + location.search);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Going back to this page from another one still returns to where the visitor was.
+    window.addEventListener('load', () => requestAnimationFrame(() => (history.scrollRestoration = 'auto')), { once: true });
+  }
+</script>

@@ -1,0 +1,13 @@
+# public_html/.htaccess に追記する設定の見本です。ビルドには含まれません。
+# 既存の .htaccess を上書きせず、中身を確認してから必要な部分だけ追記してください(README参照)。
+
+# 独自の404ページを表示する
+ErrorDocument 404 /404.html
+
+# http:// を https:// へ転送する(Xserverの案内と同じ書き方)
+# すでに同様の設定がある場合や、「常時SSL化」を設定済みの場合は追加しないでください。
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !on
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>

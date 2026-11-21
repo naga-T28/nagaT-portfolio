@@ -1,0 +1,173 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import photo from '../../assets/photos/nagat.jpg';
+import MorseMark from '../../components/MorseMark.astro';
+import PageHero from '../../components/PageHero.astro';
+import SocialIcon from '../../components/SocialIcon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAboutPage, getContactPage, getHomePage, getSite } from '../../lib/content';
+import { langOf, languagePaths } from '../../lib/i18n';
+
+export const getStaticPaths = languagePaths;
+
+const lang = langOf(Astro.url);
+const page = await getAboutPage(lang);
+const { data: contact } = await getContactPage(lang);
+const { data: site } = await getSite(lang);
+const { data: home } = await getHomePage(lang);
+const { Content } = await render(page);
+---
+
+<BaseLayout title={page.data.title} description={page.data.description}>
+  <PageHero title={page.data.title} />
+
+  <div class="frame page-body">
+    <section class="profile">
+      <Image
+        class="photo"
+        src={photo}
+        alt={home.photoAlt}
+        widths={[240, 400]}
+        sizes="(min-width: 40rem) 15rem, 12rem"
+        format="webp"
+        quality={80}
+        loading="eager"
+        data-above-fold
+        decoding="async"
+      />
+      <div class="intro">
+        <p class="display name">{site.name}</p>
+        <p class="affiliation">{page.data.affiliation}</p>
+        <div class="bio">
+          {page.data.bio.map((line) => <p>{line}</p>)}
+        </div>
+      </div>
+      <ul class="links" aria-label={page.data.linksHeading}>
+        {
+          contact.links.map((link) => (
+            <li>
+              <a class="social" href={link.href} target="_blank" rel="noopener noreferrer" title={link.label}>
+                <SocialIcon name={link.label} />
+                <span class="visually-hidden">{link.label} {site.ui.newTab}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <div class="md">
+      <Content />
+    </div>
+
+    <aside class="colophon" aria-label={site.ui.siteNote}>
+      <MorseMark />
+      <p>{page.data.colophon}</p>
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Narrow screens stack photo, text and links. From 40rem the links sit under the photo. */
+  .profile {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .photo {
+    width: 12rem;
+    aspect-ratio: 1;
+  }
+
+  .intro {
+    display: grid;
+    align-content: start;
+    gap: var(--space-sm);
+    min-width: 0;
+  }
+
+  .name {
+    font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem);
+    text-transform: none;
+  }
+
+  .affiliation {
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+
+  .bio {
+    display: grid;
+    gap: var(--space-sm);
+    margin-top: var(--space-xs);
+    font-size: var(--text-lead);
+  }
+
+  .links {
+    display: grid;
+    grid-template-columns: repeat(6, 2.75rem);
+    gap: var(--space-2xs);
+  }
+
+  .social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.75rem;
+    border: var(--rule-thin) solid currentColor;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .social:hover {
+      background: var(--color-ink);
+      color: var(--color-paper);
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .profile {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        'photo intro'
+        'links intro';
+      gap: var(--space-md) var(--space-2xl);
+    }
+
+    .photo {
+      grid-area: photo;
+      width: 100%;
+    }
+
+    /* The name stays at the top; the introduction sits on the bottom edge of the links. */
+    .intro {
+      grid-area: intro;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .bio {
+      align-self: end;
+    }
+
+    /* Two rows of three, as wide as the photo above them. */
+    .links {
+      grid-area: links;
+      align-self: start;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-xs);
+    }
+  }
+
+  .colophon {
+    display: grid;
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: var(--rule-thin) solid var(--color-ink);
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+</style>

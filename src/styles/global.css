@@ -1,0 +1,516 @@
+@import './tokens.css';
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('../assets/fonts/archivo-expanded-800.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../assets/fonts/jetbrains-mono-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+/* Arial stretched to Archivo Expanded's metrics, so the swap does not reflow headings. */
+@font-face {
+  font-family: 'Archivo Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Arial');
+  font-weight: 800;
+  size-adjust: 112%;
+  ascent-override: 78%;
+  descent-override: 19%;
+  line-gap-override: 0%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  background: var(--color-paper);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  overflow-x: clip;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.85;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[lang='en'] body {
+  line-height: 1.65;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
+a:active,
+button:active {
+  opacity: 0.72;
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+/* Break Japanese at phrase boundaries where supported, and avoid a lone word on the last line. */
+p,
+li,
+dd,
+h1,
+h2,
+h3,
+h4 {
+  word-break: auto-phrase;
+  line-break: strict;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  z-index: 100;
+  top: var(--space-xs);
+  left: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--text-small);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* Shared type voices */
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--text-label);
+  line-height: 1.5;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.name {
+  text-transform: none;
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+/* All content sits in one centred column. Only the home hero runs wider. */
+.frame {
+  width: 100%;
+  max-width: calc(var(--column) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.page-body {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3rem);
+  padding-block: clamp(2rem, 4vw, 3rem) var(--section-gap);
+}
+
+/* Long lines are tiring to read, so running text stops short of the column's full width. */
+main p,
+main dd {
+  max-width: var(--measure);
+}
+
+/* Text written in the Markdown files. */
+.md > * + * {
+  margin-top: var(--space-md);
+}
+
+.md h2 {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  padding-top: var(--space-sm);
+  border-top: var(--rule-thin) solid var(--color-ink);
+  font-size: var(--text-h3);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.md h2:first-child {
+  margin-top: 0;
+}
+
+.md h2 + * {
+  margin-top: var(--space-xs);
+}
+
+.md h3 {
+  margin-top: var(--space-lg);
+  font-size: var(--text-body);
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.md h3 + p {
+  margin-top: 0;
+}
+
+.md ul {
+  max-width: var(--measure);
+  padding-left: 1.25em;
+  list-style: square;
+}
+
+.md li + li {
+  margin-top: var(--space-xs);
+}
+
+.md a {
+  font-weight: 700;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+}
+
+.md blockquote {
+  max-width: var(--measure);
+  margin: var(--space-lg) 0 0;
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
+.md table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.md th,
+.md td {
+  padding-block: var(--space-xs);
+  text-align: left;
+  vertical-align: top;
+  font-weight: inherit;
+}
+
+.md td:first-child {
+  padding-right: var(--space-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* A Markdown table inside <div class="timeline">: the year, a line joining the markers, the event. */
+.md h2 + .timeline {
+  margin-top: var(--space-lg);
+}
+
+.timeline {
+  --marker: 1rem;
+  --row-line: 1.75rem;
+  --marker-top: calc((var(--row-line) - var(--marker)) / 2);
+}
+
+.md .timeline td {
+  padding-block: 0 var(--space-xl);
+  line-height: var(--row-line);
+}
+
+.md .timeline tr:last-child td {
+  padding-bottom: 0;
+}
+
+.md .timeline td:first-child {
+  width: 1%;
+  padding-right: var(--space-md);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+}
+
+.md .timeline td:last-child {
+  position: relative;
+  padding-left: calc(var(--marker) + var(--space-md));
+}
+
+.md .timeline td:last-child::before,
+.md .timeline td:last-child::after {
+  content: '';
+  position: absolute;
+  background: var(--color-ink);
+}
+
+/* The line runs the full height of each row, so the rows join up. */
+.md .timeline td:last-child::before {
+  inset-block: 0;
+  left: calc((var(--marker) - var(--rule-mid)) / 2);
+  width: var(--rule-mid);
+}
+
+.md .timeline tr:first-child td:last-child::before {
+  top: var(--marker-top);
+}
+
+.md .timeline tr:last-child td:last-child::before {
+  bottom: auto;
+  height: var(--marker-top);
+}
+
+.md .timeline td:last-child::after {
+  top: var(--marker-top);
+  left: 0;
+  width: var(--marker);
+  height: var(--marker);
+}
+
+/* The header row is required by Markdown and read by screen readers, but not needed visually. */
+.md thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.subhead {
+  margin-bottom: var(--space-xs);
+  padding-top: var(--space-sm);
+  border-top: var(--rule-thin) solid var(--color-ink);
+  font-size: var(--text-h3);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.section {
+  padding-block: var(--section-gap);
+}
+
+.prose > * + * {
+  margin-top: var(--space-md);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-sm);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--text-label);
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+/* The hero is hidden only until GSAP has set its start state (see BaseLayout). */
+.motion-pending [data-hero-hide] {
+  visibility: hidden;
+}
+
+/* Cross-document page transition: browser-native, no JavaScript. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root) {
+    animation: page-out var(--dur-fast) var(--ease-in) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: page-in var(--dur-mid) var(--ease-out) both;
+  }
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Shared link voice: thick underline that retracts and regrows on hover. */
+.link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding-block: 0.25em 0.5em;
+  white-space: nowrap;
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--text-small);
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--rule-mid);
+  background: currentColor;
+  transform-origin: right center;
+}
+
+.arrow {
+  flex: none;
+  width: 0.8em;
+  height: 0.8em;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .link:hover::after,
+  .link-group:hover .link::after {
+    animation: underline-sweep var(--dur-slow) var(--ease-in-out);
+  }
+
+  .link:hover .arrow,
+  .link-group:hover .arrow {
+    transform: translate(3px, -3px);
+  }
+}
+
+.link:active .arrow {
+  transform: translate(1px, -1px);
+}
+
+@keyframes underline-sweep {
+  0% {
+    transform: scaleX(1);
+    transform-origin: right center;
+  }
+  49% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+  50% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  100% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+@media print {
+  [data-card],
+  [data-fade],
+  [data-rule] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .sound,
+  .menu-toggle {
+    display: none !important;
+  }
+}

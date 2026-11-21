@@ -1,0 +1,382 @@
+---
+import { sound } from '../data/site';
+import { getHomePage, getSite } from '../lib/content';
+import { langOf } from '../lib/i18n';
+import { formatTime } from '../lib/format';
+
+const lang = langOf(Astro.url);
+const { data: home } = await getHomePage(lang);
+const { ui } = (await getSite(lang)).data;
+const withTitle = (text: string) => text.replace('{title}', home.musicTitle);
+---
+
+<div class="sound" data-sound data-title={home.musicTitle}
+  data-artist={home.musicArtist}
+  data-play-label={withTitle(ui.play)}
+  data-pause-label={withTitle(ui.pause)}
+  data-mute-label={ui.mute}
+  data-unmute-label={ui.unmute}
+  data-error-text={ui.playError}
+>
+  <div class="inner">
+    <div class="player">
+      <audio src={sound.src} preload="none" data-sound-audio></audio>
+      <button class="toggle" type="button" aria-label={withTitle(ui.play)} data-sound-toggle>
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path class="play" d="M3 1.5L14 8L3 14.5Z"></path>
+          <rect class="pause" x="3" y="2" width="3.5" height="12"></rect>
+          <rect class="pause" x="9.5" y="2" width="3.5" height="12"></rect>
+        </svg>
+      </button>
+
+      <p class="title label"><span class="name">{home.musicTitle}</span></p>
+
+      <!-- The range input sits invisibly over the waveform: it handles clicks, dragging and keys. -->
+      <div class="wave">
+        <input
+          class="seek"
+          type="range"
+          min="0"
+          max={sound.duration}
+          step="1"
+          value="0"
+          aria-label={ui.seek}
+          aria-valuetext={`0:00 / ${formatTime(sound.duration)}`}
+          data-sound-seek
+        />
+        <canvas class="canvas" data-sound-wave aria-hidden="true"></canvas>
+      </div>
+
+      <p class="time label">
+        <span data-sound-current>0:00</span><span class="total"> / <span data-sound-total>{formatTime(sound.duration)}</span></span>
+      </p>
+
+      <button class="loop" type="button" aria-label={ui.loop} aria-pressed="false" title={ui.loop} data-sound-loop>
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M2 8V4H10.5M14 8V12H5.5" fill="none" stroke="currentColor" stroke-width="1.75"></path>
+          <path d="M10.5 1L14.5 4L10.5 7Z"></path>
+          <path d="M5.5 9L1.5 12L5.5 15Z"></path>
+        </svg>
+      </button>
+
+      <div class="volume">
+        <button class="mute" type="button" aria-label={ui.mute} data-sound-mute>
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M1 5.5H4L8 2V14L4 10.5H1Z"></path>
+            <rect class="level" x="10" y="6" width="1.75" height="4"></rect>
+            <rect class="level" x="13" y="4" width="1.75" height="8"></rect>
+            <path class="muted" d="M10 5.5L15 10.5M15 5.5L10 10.5" fill="none" stroke="currentColor" stroke-width="1.75"></path>
+          </svg>
+        </button>
+        <input
+          class="level-slider"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="0.7"
+          aria-label={ui.volume}
+          aria-valuetext="70%"
+          data-sound-volume
+        />
+      </div>
+
+      <p class="visually-hidden" role="status" data-sound-status></p>
+    </div>
+    <a class="fallback label" href={sound.src}>{withTitle(ui.listen)}</a>
+  </div>
+</div>
+
+<style>
+  .sound {
+    border-bottom: var(--rule-thin) solid var(--color-ink);
+    background: var(--color-paper);
+  }
+
+  .inner {
+    max-width: var(--frame);
+    margin-inline: auto;
+    padding-right: var(--gutter);
+  }
+
+  /* Narrow screens: name, time and volume above, the waveform below, the button beside both. */
+  .player {
+    display: none;
+    grid-template-columns: 3.75rem minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      'toggle title loop volume time'
+      'toggle wave wave wave wave';
+    align-items: center;
+    gap: 0 var(--space-xs);
+  }
+
+  :global(.js) .player {
+    display: grid;
+  }
+
+  :global(.js) .fallback {
+    display: none;
+  }
+
+  .fallback {
+    display: block;
+    padding: var(--space-sm) 0 var(--space-sm) var(--gutter);
+  }
+
+  .toggle {
+    grid-area: toggle;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    border: 0;
+    cursor: pointer;
+  }
+
+  .toggle svg {
+    width: 1rem;
+    height: 1rem;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  /* The button fills the strip, so its focus ring goes inside. */
+  .toggle:focus-visible {
+    outline-offset: -6px;
+  }
+
+  @media (hover: hover) {
+    .toggle:hover svg {
+      transform: scale(1.15);
+    }
+  }
+
+  .pause {
+    display: none;
+  }
+
+  [data-playing] .pause {
+    display: block;
+  }
+
+  [data-playing] .play {
+    display: none;
+  }
+
+  .title {
+    grid-area: title;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    letter-spacing: 0.06em;
+  }
+
+  .time {
+    grid-area: time;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+
+  /* Phones show only the current time, so the song's name still fits beside the buttons. */
+  .total {
+    display: none;
+  }
+
+  .wave {
+    position: relative;
+    grid-area: wave;
+    height: 1.5rem;
+    min-width: 0;
+  }
+
+  .canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: var(--color-ink);
+    --unplayed: var(--color-wave);
+  }
+
+  .seek {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    visibility: hidden;
+    appearance: none;
+  }
+
+  /* Nothing is drawn while stopped, so there is nothing to click or focus either. */
+  [data-playing] .seek {
+    visibility: visible;
+  }
+
+  /* A hairline thumb keeps a click's position in step with the column under the pointer. */
+  .seek::-webkit-slider-thumb {
+    width: 1px;
+    height: 1px;
+    appearance: none;
+  }
+
+  .seek::-moz-range-thumb {
+    width: 1px;
+    height: 1px;
+    border: 0;
+  }
+
+  .seek:focus-visible + .canvas {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  .loop {
+    grid-area: loop;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 1.5rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .loop svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* On reads as a filled block, the same black as the play button. */
+  .loop[aria-pressed='true'] {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  @media (forced-colors: active) {
+    .loop[aria-pressed='true'] {
+      forced-color-adjust: none;
+      background: Highlight;
+      color: HighlightText;
+    }
+  }
+
+  .volume {
+    grid-area: volume;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-width: 0;
+  }
+
+  .mute {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 1.5rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .mute svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .muted {
+    display: none;
+  }
+
+  [data-muted] .muted {
+    display: block;
+  }
+
+  [data-muted] .level {
+    display: none;
+  }
+
+  .level-slider {
+    --level: 70%;
+    display: none;
+    width: 3rem;
+    height: 1.5rem;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+    appearance: none;
+  }
+
+  .level-slider::-webkit-slider-runnable-track {
+    height: var(--rule-mid);
+    background: linear-gradient(to right, var(--color-ink) var(--level), var(--color-wave) var(--level));
+  }
+
+  .level-slider::-moz-range-track {
+    height: var(--rule-mid);
+    background: linear-gradient(to right, var(--color-ink) var(--level), var(--color-wave) var(--level));
+  }
+
+  .level-slider::-webkit-slider-thumb {
+    width: var(--space-sm);
+    height: var(--space-sm);
+    margin-top: -0.25rem;
+    background: var(--color-ink);
+    border: 0;
+    border-radius: 0;
+    appearance: none;
+  }
+
+  .level-slider::-moz-range-thumb {
+    width: var(--space-sm);
+    height: var(--space-sm);
+    background: var(--color-ink);
+    border: 0;
+    border-radius: 0;
+  }
+
+  @media (min-width: 22.5rem) {
+    .level-slider {
+      display: block;
+    }
+  }
+
+  @media (min-width: 30rem) {
+    .total {
+      display: inline;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .player {
+      grid-template-columns: 5rem auto minmax(0, 1fr) auto auto auto;
+      grid-template-areas: 'toggle title wave time loop volume';
+      gap: var(--space-lg);
+    }
+
+    /* The waves stand exactly as tall as the play button. */
+    .wave {
+      height: 2.75rem;
+    }
+
+    .level-slider {
+      width: 4.5rem;
+    }
+  }
+</style>

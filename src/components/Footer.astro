@@ -1,0 +1,61 @@
+---
+import { getSite } from '../lib/content';
+import { langOf } from '../lib/i18n';
+
+const { data: site } = await getSite(langOf(Astro.url));
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="bottom frame">
+    <nav aria-label={site.ui.footerNav}>
+      <ul>
+        {site.navigation.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+      </ul>
+    </nav>
+    <p class="label">© {year} <span class="name">{site.name}</span></p>
+  </div>
+</footer>
+
+<style>
+  /* The rule belongs to the footer itself, so it reaches both screen edges on every page. */
+  .site-footer {
+    padding-block: var(--space-md) var(--space-xl);
+    border-top: var(--rule-mid) solid var(--color-ink);
+  }
+
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-xl);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-md);
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-underline-offset: 0.35em;
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    a:hover {
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+    }
+  }
+</style>

@@ -1,0 +1,33 @@
+{
+  "name": "naga-portfolio",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "NAGA personal portfolio. Astro static site built into deploy/ for Xserver.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "node scripts/serve-deploy.mjs",
+    "check": "astro check",
+    "verify": "node scripts/verify-deploy.mjs",
+    "test:browser": "node scripts/verify-browser.mjs",
+    "assets": "node scripts/generate-icons.mjs",
+    "assets:og": "node scripts/generate-og-image.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.4.5",
+    "gsap": "^3.15.1",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "playwright": "^1.64.1",
+    "typescript": "^6.0.3"
+  }
+}

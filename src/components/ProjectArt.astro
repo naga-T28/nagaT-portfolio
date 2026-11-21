@@ -1,0 +1,156 @@
+---
+import type { ProjectEntry } from '../lib/content';
+
+interface Props {
+  kind: ProjectEntry['data']['art'];
+}
+const { kind } = Astro.props;
+
+// Each piece abstracts what the project does: a route, a confirmation matrix, a viewfinder,
+// two audio channels, three panes, elevator shafts, a split bill.
+const matrix = ['xoxx/', 'oxo/x', 'xx/ox', '/oxxo', 'xo/xx'];
+const waveTop = [24, 44, 72, 38, 92, 60, 28, 16, 8, 8, 8, 8, 8, 12];
+const waveBottom = [6, 6, 6, 8, 12, 8, 26, 58, 84, 46, 96, 54, 30, 10];
+const route = 'M-8 196H88V124H152V48H248';
+const routeStops = [
+  [88, 196],
+  [152, 124],
+  [152, 48],
+];
+const paneLines = [40, 64, 88, 112, 136, 160, 184, 208];
+const floors = [20, 60, 100, 140, 180, 220];
+const cars = [
+  [36, 100],
+  [100, 20],
+  [164, 140],
+];
+---
+
+<svg class="art" viewBox="0 0 240 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  {
+    kind === 'route' && (
+      <>
+        <rect class="ink" width="240" height="240" />
+        <path d={route} fill="none" class="line-paper" stroke-width="30" />
+        <path d={route} fill="none" class="line-ink" stroke-width="8" />
+        {routeStops.map(([x, y]) => (
+          <>
+            <circle class="paper" cx={x} cy={y} r="24" />
+            <circle class="ink" cx={x} cy={y} r="9" />
+          </>
+        ))}
+      </>
+    )
+  }
+  {
+    kind === 'matrix' && (
+      <>
+        <rect class="paper" width="240" height="240" />
+        {matrix.map((row, y) =>
+          [...row].map((cell, x) => {
+            const left = 4 + x * 47;
+            const top = 4 + y * 47;
+            return (
+              <>
+                {cell === 'x' && <rect class="ink" x={left} y={top} width="40" height="40" />}
+                {cell === 'o' && <rect class="line-ink" x={left + 2} y={top + 2} width="36" height="36" fill="none" stroke-width="4" />}
+                {cell === '/' && (
+                  <>
+                    <rect class="line-ink" x={left + 2} y={top + 2} width="36" height="36" fill="none" stroke-width="4" />
+                    <path class="line-ink" d={`M${left + 2} ${top + 38}L${left + 38} ${top + 2}`} stroke-width="4" />
+                  </>
+                )}
+              </>
+            );
+          }),
+        )}
+      </>
+    )
+  }
+  {
+    kind === 'scan' && (
+      <>
+        <rect class="ink" width="240" height="240" />
+        <path class="line-paper" fill="none" stroke-width="14" d="M24 72V24H72M168 24H216V72M216 168V216H168M72 216H24V168" />
+        <rect class="paper" x="56" y="70" width="128" height="14" />
+        <rect class="paper" x="56" y="98" width="86" height="14" />
+        <rect class="paper" x="-8" y="126" width="256" height="4" />
+        <rect class="paper" x="56" y="144" width="112" height="14" />
+      </>
+    )
+  }
+  {
+    kind === 'wave' && (
+      <>
+        <rect class="ink" width="240" height="240" />
+        {waveTop.map((height, index) => <rect class="paper" x={8 + index * 16.5} y={116 - height} width="10" height={height} />)}
+        {waveBottom.map((height, index) => <rect class="paper" x={8 + index * 16.5} y="124" width="10" height={height} />)}
+      </>
+    )
+  }
+  {
+    kind === 'panes' && (
+      <>
+        <rect class="paper" width="240" height="240" />
+        <rect class="ink" width="48" height="240" />
+        <rect class="ink" x="56" width="112" height="240" />
+        <rect class="ink" x="176" width="64" height="240" />
+        {paneLines.map((y, index) => (
+          <>
+            <rect class="paper" x="10" y={y} width={index % 2 ? 18 : 28} height="6" />
+            {index < 5 && <rect class="paper" x="70" y={y} width={[84, 62, 76, 40, 70][index]} height="6" />}
+            <rect class="paper" x="190" y={y} width={index % 3 ? 36 : 22} height="6" />
+          </>
+        ))}
+      </>
+    )
+  }
+  {
+    kind === 'shafts' && (
+      <>
+        <rect class="paper" width="240" height="240" />
+        {floors.map((y) => <rect class="ink" y={y} width="240" height="2" />)}
+        {cars.map(([x, y]) => (
+          <>
+            <rect class="ink" x={(x ?? 0) + 18} width="4" height="240" />
+            <rect class="ink" x={x} y={y} width="40" height="82" />
+          </>
+        ))}
+      </>
+    )
+  }
+  {
+    kind === 'split' && (
+      <>
+        <rect class="ink" width="240" height="240" />
+        <circle class="paper" cx="120" cy="104" r="84" />
+        <path class="ink" d="M120 104V20A84 84 0 0 1 193 146Z" />
+        <rect class="ink" x="116" y="16" width="8" height="92" />
+        <path class="paper" d="M0 240V212L20 196L40 212L60 196L80 212L100 196L120 212L140 196L160 212L180 196L200 212L220 196L240 212V240Z" />
+      </>
+    )
+  }
+</svg>
+
+<style>
+  .art {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ink {
+    fill: var(--color-ink);
+  }
+
+  .paper {
+    fill: var(--color-paper);
+  }
+
+  .line-ink {
+    stroke: var(--color-ink);
+  }
+
+  .line-paper {
+    stroke: var(--color-paper);
+  }
+</style>

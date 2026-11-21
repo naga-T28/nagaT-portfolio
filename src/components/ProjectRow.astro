@@ -1,0 +1,131 @@
+---
+import Arrow from './Arrow.astro';
+import ProjectArt from './ProjectArt.astro';
+import { getProjectsPage, projectSlug, type ProjectEntry } from '../lib/content';
+import { langOf, localize } from '../lib/i18n';
+import { joinList } from '../lib/format';
+
+interface Props {
+  project: ProjectEntry;
+  showStack?: boolean;
+  headingLevel?: 'h2' | 'h3';
+}
+const { project, showStack = false, headingLevel: Heading = 'h3' } = Astro.props;
+const { data } = project;
+const lang = langOf(Astro.url);
+const { data: labels } = await getProjectsPage(lang);
+---
+
+<article class="row link-group" data-card>
+  <div class="thumb">
+    <ProjectArt kind={data.art} />
+  </div>
+  <div class="main">
+    <p class="meta">{data.format} / {data.status}</p>
+    <Heading class="display title">
+      <a href={localize(`/projects/${projectSlug(project)}/`, lang)}>{data.title}</a>
+    </Heading>
+    <p class="summary">{data.summary}</p>
+    {showStack && <p class="stack">{joinList(data.stack)}</p>}
+    <span class="link view" aria-hidden="true">
+      <span>{labels.viewLabel}</span>
+      <Arrow />
+    </span>
+  </div>
+</article>
+
+<style>
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: var(--space-md);
+    align-items: start;
+    padding-block: var(--space-lg);
+    border-top: var(--rule-thin) solid var(--color-ink);
+  }
+
+  /* The first row sits right under a heading that already has its own line. */
+  .row:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .thumb {
+    aspect-ratio: 1;
+    overflow: clip;
+  }
+
+  .thumb :global(.art) {
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .main {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-xs);
+    min-width: 0;
+  }
+
+  .meta,
+  .stack {
+    font-size: var(--text-small);
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  .meta {
+    font-weight: 700;
+  }
+
+  /* Sized from the text column (the thumbnail and gap take 6rem), so the longest word fits on one line. */
+  .title {
+    font-size: clamp(1.125rem, calc((var(--column-now) - 6rem) / var(--longest-word)), 2.25rem);
+    overflow-wrap: normal;
+  }
+
+  .title a {
+    text-decoration: none;
+  }
+
+  /* The whole row is one link target. */
+  .title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .title a:focus-visible {
+    outline: none;
+  }
+
+  .title a:focus-visible::after {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  .summary {
+    line-height: 1.8;
+  }
+
+  .view {
+    margin-top: var(--space-xs);
+  }
+
+  @media (hover: hover) {
+    .row:hover .thumb :global(.art) {
+      transform: scale(1.05);
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .row {
+      grid-template-columns: 11rem minmax(0, 1fr);
+      gap: var(--space-xl);
+    }
+
+    .title {
+      font-size: clamp(1.125rem, calc((var(--column-now) - 13rem) / var(--longest-word)), 2.25rem);
+    }
+  }
+</style>

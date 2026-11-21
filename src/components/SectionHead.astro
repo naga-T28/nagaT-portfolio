@@ -1,0 +1,35 @@
+---
+interface Props {
+  title: string;
+  id?: string;
+  /** Percentage the title drifts sideways while scrolling. */
+  drift?: number;
+}
+const { title, id, drift } = Astro.props;
+---
+
+<div class="section-head">
+  <h2 class="display title" id={id} {...drift ? { 'data-drift': drift } : { 'data-fade': '' }}>{title}</h2>
+  <span class="rule" data-rule aria-hidden="true"></span>
+</div>
+
+<style>
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-lg);
+    margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
+  }
+
+  .title {
+    font-size: var(--text-title);
+    scroll-margin-top: var(--space-lg);
+  }
+
+  .rule {
+    flex: 1 1 3rem;
+    height: var(--rule-mid);
+    background: currentColor;
+  }
+</style>

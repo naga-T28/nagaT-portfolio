@@ -1,0 +1,176 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Arrow from '../../../components/Arrow.astro';
+import PageHero from '../../../components/PageHero.astro';
+import ProjectArt from '../../../components/ProjectArt.astro';
+import TextLink from '../../../components/TextLink.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getProjects, getProjectsPage, projectSlug, type ProjectEntry } from '../../../lib/content';
+import { LANGUAGES, langOf, languageParams, localize } from '../../../lib/i18n';
+import { joinList } from '../../../lib/format';
+
+export const getStaticPaths = (async () => {
+  const paths = await Promise.all(
+    LANGUAGES.map(async (lang) => {
+      const projects = await getProjects(lang);
+      return projects.map((project, index) => ({
+        params: { ...languageParams(lang), slug: projectSlug(project) },
+        props: { project, next: projects[(index + 1) % projects.length]! },
+      }));
+    }),
+  );
+  return paths.flat();
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: ProjectEntry;
+  next: ProjectEntry;
+}
+const { project, next } = Astro.props;
+const { data } = project;
+const lang = langOf(Astro.url);
+const { data: labels } = await getProjectsPage(lang);
+const { Content } = await render(project);
+const meta = joinList([data.format, data.team, data.status, data.period]);
+---
+
+<BaseLayout title={data.title} description={`${data.title}: ${data.summary}`} type="article">
+  <PageHero title={data.title} lead={data.overview}>
+    <a slot="before" class="back label" href={localize('/projects/', lang)}>
+      <Arrow direction="left" />
+      <span>{labels.backLabel}</span>
+    </a>
+    <p class="meta">{meta}</p>
+    <ProjectArt slot="aside" kind={data.art} />
+  </PageHero>
+
+  <div class="frame page-body">
+    <div class="md">
+      <Content />
+    </div>
+
+    <section>
+      <h2 class="subhead">{labels.stackHeading}</h2>
+      <p>{joinList(data.stack)}</p>
+    </section>
+
+    {
+      data.screenshot && (
+        <figure class:list={['shot', data.screenshot.orientation]}>
+          <Image
+            src={data.screenshot.src}
+            alt={data.screenshot.alt}
+            widths={data.screenshot.orientation === 'portrait' ? [320, 480] : [640, 960, 1280]}
+            sizes={data.screenshot.orientation === 'portrait' ? '(min-width: 30rem) 20rem, 100vw' : '(min-width: 56rem) 52rem, 100vw'}
+            format="webp"
+            quality={78}
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption class="muted">{labels.screenshotCaption}</figcaption>
+        </figure>
+      )
+    }
+
+    {
+      data.links.length > 0 && (
+        <section>
+          <h2 class="subhead">{labels.linksHeading}</h2>
+          <ul class="links">
+            {data.links.map((link) => <li><TextLink href={link.href}>{link.label}</TextLink></li>)}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+
+  <a class="next" href={localize(`/projects/${projectSlug(next)}/`, lang)}>
+    <span class="frame next-inner">
+      <span class="next-copy">
+        <span class="label">{labels.nextLabel}</span>
+        <span class="display next-title">{next.data.title}</span>
+      </span>
+      <Arrow />
+    </span>
+  </a>
+</BaseLayout>
+
+<style>
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: 2.75rem;
+    margin-bottom: var(--space-md);
+    text-decoration: none;
+  }
+
+  .meta {
+    font-size: var(--text-small);
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+
+  .shot img {
+    width: 100%;
+    border: var(--rule-thin) solid var(--color-ink);
+    background: var(--color-paper-2);
+  }
+
+  .shot.portrait {
+    max-width: 20rem;
+  }
+
+  .shot figcaption {
+    margin-top: var(--space-xs);
+    font-size: var(--text-label);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-xl);
+  }
+
+  .next {
+    display: block;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    text-decoration: none;
+  }
+
+  .next:focus-visible {
+    outline-offset: -6px;
+  }
+
+  .next-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding-block: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .next-copy {
+    display: grid;
+    gap: var(--space-xs);
+    min-width: 0;
+  }
+
+  .next-title {
+    font-size: var(--text-h2);
+  }
+
+  .next :global(.arrow) {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  @media (hover: hover) {
+    .next:hover :global(.arrow) {
+      transform: translate(3px, -3px);
+    }
+  }
+</style>

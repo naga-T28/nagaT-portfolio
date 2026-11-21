@@ -1,0 +1,77 @@
+---
+import { Image } from 'astro:assets';
+import SectionHead from './SectionHead.astro';
+import TextLink from './TextLink.astro';
+import photo from '../assets/photos/nagat.jpg';
+import { getAboutPage, getHomePage, getSite } from '../lib/content';
+import { langOf, localize } from '../lib/i18n';
+
+const lang = langOf(Astro.url);
+const { data: site } = await getSite(lang);
+const { data: home } = await getHomePage(lang);
+const { data: about } = await getAboutPage(lang);
+---
+
+<section class="about">
+  <div class="frame">
+    <SectionHead title={about.title} />
+    <div class="card">
+      <Image
+        class="photo"
+        src={photo}
+        alt={home.photoAlt}
+        widths={[240, 400]}
+        sizes="(min-width: 40rem) 15rem, 12rem"
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <div class="copy">
+        <p class="display name">{site.name}</p>
+        <p class="line">{home.aboutLine}</p>
+        <TextLink href={localize('/about/', lang)}>{home.aboutLink}</TextLink>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .card {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .photo {
+    width: 12rem;
+    aspect-ratio: 1;
+  }
+
+  .copy {
+    display: grid;
+    justify-items: start;
+    align-content: center;
+    gap: var(--space-md);
+    min-width: 0;
+  }
+
+  .name {
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+    text-transform: none;
+  }
+
+  .line {
+    font-size: var(--text-lead);
+  }
+
+  @media (min-width: 40rem) {
+    .card {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      gap: var(--space-2xl);
+    }
+
+    .photo {
+      width: 100%;
+    }
+  }
+</style>

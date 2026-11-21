@@ -1,0 +1,36 @@
+---
+import SectionHead from './SectionHead.astro';
+import TextLink from './TextLink.astro';
+import { getHomePage, getResearchPage } from '../lib/content';
+import { langOf, localize } from '../lib/i18n';
+
+const lang = langOf(Astro.url);
+const { data: home } = await getHomePage(lang);
+const { data } = await getResearchPage(lang);
+---
+
+<section class="research">
+  <div class="frame">
+    <SectionHead title={data.title} drift={2.5} />
+    <h3 class="theme">{data.theme}</h3>
+    <p class="summary">{data.summary}</p>
+    <TextLink href={localize('/research/', lang)}>{home.researchLink}</TextLink>
+  </div>
+</section>
+
+<style>
+  .research {
+    overflow: clip;
+    padding-bottom: var(--section-gap);
+  }
+
+  .theme {
+    font-size: var(--text-h3);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .summary {
+    margin-block: var(--space-sm) var(--space-md);
+  }
+</style>

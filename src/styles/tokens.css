@@ -1,0 +1,67 @@
+/* Hallmark · pre-emit critique: P5 H5 E4 S5 R4 V5 */
+/* Hallmark · macrostructure: custom (bespoke, from user reference) · tone: austere / technical
+ * theme: custom · paper oklch(99% 0 0) · ink oklch(15% 0 0) · accent: none (monochrome)
+ * display: Archivo Expanded 800 · labels: JetBrains Mono 600 · body: system Japanese gothic
+ */
+:root {
+  color-scheme: light;
+
+  --color-ink: oklch(15% 0 0);
+  --color-paper: oklch(99% 0 0);
+  --color-paper-2: oklch(93.5% 0 0);
+  --color-muted: oklch(42% 0 0);
+  --color-wave: oklch(76% 0 0);
+
+  --font-display: 'Archivo', 'Archivo Fallback', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic UI', Meiryo, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, 'Hiragino Sans', 'Noto Sans JP', monospace;
+  --font-body: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI', 'Yu Gothic', Meiryo, system-ui, sans-serif;
+
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --space-4xl: 6rem;
+
+  --gutter: clamp(1rem, 3.2vw, 2.5rem);
+  --section-gap: clamp(4rem, 7vw, 6.5rem);
+  --header-height: 4.25rem;
+  --frame: 105rem;
+  --column: 52rem;
+  --measure: 42rem;
+  --column-now: min(var(--column), calc(100vw - var(--gutter) * 2));
+  /* The longest single word in a title ("Meetscribe") is about 8.5em wide. */
+  --longest-word: 8.7;
+
+  --text-label: 0.75rem;
+  --text-small: 0.9375rem;
+  --text-body: 1.0625rem;
+  --text-lead: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --text-h3: clamp(1.25rem, 1.15rem + 0.5vw, 1.625rem);
+  --text-h2: clamp(1.75rem, 1.3rem + 2.2vw, 3rem);
+  --text-title: clamp(1.75rem, 1rem + 2.8vw, 3rem);
+
+  --tracking-label: 0.14em;
+  --tracking-wide: 0.24em;
+
+  --rule-thin: 2px;
+  --rule-mid: 4px;
+  --rule-thick: 24px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 180ms;
+  --dur-mid: 320ms;
+  --dur-slow: 600ms;
+}
+
+/* The navigation wraps onto a second line in this narrow range. */
+@media (min-width: 48rem) and (max-width: 49.99rem) {
+  :root {
+    --header-height: 7.5rem;
+  }
+}

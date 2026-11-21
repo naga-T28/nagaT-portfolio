@@ -1,0 +1,240 @@
+---
+import { getSite } from '../lib/content';
+import { alternatePath, langOf, localize } from '../lib/i18n';
+
+const lang = langOf(Astro.url);
+const { data: site } = await getSite(lang);
+const otherLang = lang === 'ja' ? 'en' : 'ja';
+const home = localize('/', lang);
+
+const pathname = Astro.url.pathname;
+const isCurrent = (href: string) => (href === home ? pathname === home : pathname.startsWith(href));
+---
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href={home}>
+      <img class="mark" src="/icon-header.png" width="44" height="44" alt="" />
+      <span class="divider" aria-hidden="true"></span>
+      <span class="brand-text label"><span class="name">{site.name}</span> — {site.brandSuffix}</span>
+    </a>
+
+    <button class="menu-toggle label" type="button" aria-expanded="false" aria-controls="site-nav" data-menu-toggle data-open-text={site.ui.menu} data-close-text={site.ui.close}>
+      <span data-menu-label>{site.ui.menu}</span>
+    </button>
+
+    <nav id="site-nav" class="nav" aria-label={site.ui.mainNav} data-menu>
+      <ul>
+        {
+          site.navigation.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+        <li class="switch">
+          <a href={alternatePath(pathname)} hreflang={otherLang} lang={otherLang} aria-label={site.switchAria} data-lang-switch>
+            {site.switchLabel}
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: relative;
+    z-index: 20;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    view-transition-name: site-header;
+  }
+
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-sm);
+    width: 100%;
+    max-width: var(--frame);
+    min-height: 4rem;
+    margin-inline: auto;
+    padding: var(--space-sm) var(--gutter);
+  }
+
+  .brand {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    min-height: 2.75rem;
+    text-decoration: none;
+  }
+
+  .mark {
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .divider {
+    width: 1px;
+    height: 2rem;
+    background: currentColor;
+  }
+
+  .brand-text {
+    letter-spacing: var(--tracking-wide);
+    white-space: nowrap;
+  }
+
+  .menu-toggle {
+    display: none;
+    position: relative;
+    z-index: 2;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding-inline: var(--space-sm);
+    background: none;
+    border: 2px solid currentColor;
+    cursor: pointer;
+  }
+
+  /* Without JavaScript the links simply wrap below the brand. */
+  .nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-md);
+  }
+
+  .nav a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: var(--space-xs);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .nav a::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 var(--space-2xs);
+    height: 3px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform var(--dur-mid) var(--ease-out);
+  }
+
+  .switch a {
+    min-width: 2.75rem;
+    justify-content: center;
+    border: 2px solid currentColor;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .switch a::after {
+    content: none;
+  }
+
+  @media (hover: hover) {
+    .switch a:hover {
+      background: var(--color-paper);
+      color: var(--color-ink);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .switch {
+      display: flex;
+      align-items: center;
+    }
+
+    .switch a {
+      min-height: 2rem;
+    }
+  }
+
+  .nav a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  @media (hover: hover) {
+    .nav a:hover::after {
+      transform: scaleX(1);
+      transform-origin: left center;
+    }
+  }
+
+  /* The smallest phones: tighter brand, so the menu button stays on the same line. */
+  @media (max-width: 22.49rem) {
+    .brand {
+      gap: var(--space-sm);
+    }
+
+    .brand-text {
+      letter-spacing: 0.1em;
+    }
+  }
+
+  /* With JavaScript, narrow screens get a full-screen menu. */
+  @media (max-width: 47.99rem) {
+    :global(.js) .menu-toggle {
+      display: block;
+    }
+
+    :global(.js) .nav {
+      position: fixed;
+      z-index: 1;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      padding: var(--space-4xl) var(--gutter) var(--space-xl);
+      overflow-y: auto;
+      background: var(--color-ink);
+      visibility: hidden;
+      opacity: 0;
+      transition:
+        opacity var(--dur-fast) var(--ease-out),
+        visibility 0s linear var(--dur-fast);
+    }
+
+    :global(.js) .nav[data-open] {
+      visibility: visible;
+      opacity: 1;
+      transition:
+        opacity var(--dur-fast) var(--ease-out),
+        visibility 0s;
+    }
+
+    :global(.js) .nav ul {
+      flex-direction: column;
+      gap: var(--space-xs);
+      width: 100%;
+    }
+
+    :global(.js) .nav a {
+      display: inline-flex;
+      padding-inline: 0;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(2rem, 11vw, 3.5rem);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+  }
+</style>

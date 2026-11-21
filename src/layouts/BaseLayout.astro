@@ -1,0 +1,99 @@
+---
+import '../styles/global.css';
+import archivoUrl from '../assets/fonts/archivo-expanded-800.woff2?url';
+import jetbrainsUrl from '../assets/fonts/jetbrains-mono-600.woff2?url';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { getSite } from '../lib/content';
+import { alternatePath, langOf } from '../lib/i18n';
+
+interface Props {
+  /** ページ固有のタイトル。省略するとサイト共通のタイトルになります。 */
+  title?: string;
+  description: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>;
+}
+
+const { title, description, type = 'website', noindex = false, jsonLd } = Astro.props;
+const lang = langOf(Astro.url);
+const { data: site } = await getSite(lang);
+const other = new URL(alternatePath(Astro.url.pathname), Astro.site);
+const [jaUrl, enUrl] = lang === 'ja' ? [Astro.url.pathname, other.pathname] : [other.pathname, Astro.url.pathname];
+const fullTitle = title ? `${title} | ${site.name}` : site.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/og-image.jpg', Astro.site);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    {
+      !noindex && (
+        <>
+          <link rel="alternate" hreflang="ja" href={new URL(jaUrl, Astro.site)} />
+          <link rel="alternate" hreflang="en" href={new URL(enUrl, Astro.site)} />
+          <link rel="alternate" hreflang="x-default" href={new URL(jaUrl, Astro.site)} />
+        </>
+      )
+    }
+    <meta name="theme-color" content="#0a0a0a" />
+    <link rel="icon" href="/favicon.ico" sizes="64x64" />
+    <link rel="icon" href="/favicon-64.png" type="image/png" sizes="64x64" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="preload" href={archivoUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={jetbrainsUrl} as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={lang === 'ja' ? 'ja_JP' : 'en_US'} />
+    <meta property="og:locale:alternate" content={lang === 'ja' ? 'en_US' : 'ja_JP'} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={site.ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={site.twitter} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+    <!-- Hide the hero until GSAP is ready. The timeout keeps it readable if the script never loads. -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        root.classList.add('js');
+        if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+          root.classList.add('motion-pending');
+          setTimeout(function () {
+            root.classList.remove('motion-pending');
+          }, 2000);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{site.ui.skipLink}</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      import '../scripts/main';
+    </script>
+  </body>
+</html>

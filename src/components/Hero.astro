@@ -1,0 +1,206 @@
+---
+import Arrow from './Arrow.astro';
+import TStem from './TStem.astro';
+import { getHomePage, getSite } from '../lib/content';
+import { langOf } from '../lib/i18n';
+import { LOGO_HEIGHT, LOGO_WIDTH, letters, roots, slits } from '../lib/logotype';
+
+const lang = langOf(Astro.url);
+const { data: site } = await getSite(lang);
+const { data: home } = await getHomePage(lang);
+---
+
+<section class="hero" data-hero>
+  <!-- Crossbar of the upper T. Its stem is the striped column to the right of the word. -->
+  <div class="crossbar" aria-hidden="true">
+    <div class="bar bar-1" data-hero-hide data-hero-bar></div>
+    <div class="bar bar-2" data-hero-hide data-hero-bar></div>
+    <div class="bar bar-3" data-hero-hide data-hero-bar></div>
+  </div>
+
+  <div class="main">
+    <svg class="logotype" viewBox={`0 0 ${LOGO_WIDTH} ${LOGO_HEIGHT}`} data-hero-hide aria-hidden="true">
+      {letters.map((letter) => <path class="letter" d={letter.d} fill-rule="evenodd" data-hero-letter />)}
+      {slits.map((points) => <polygon class="cut" points={points} data-hero-slit />)}
+    </svg>
+
+    <!-- Crossbar of the lower T: the band, a white line, and a thin bar. -->
+    <h1 class="visually-hidden">{site.name} — {site.roles.join(' / ')}</h1>
+    <div class="band" aria-hidden="true"></div>
+    <div class="lower-bar" data-hero-hide data-hero-bar aria-hidden="true"></div>
+
+    <svg
+      class="roots"
+      viewBox={`0 0 ${LOGO_WIDTH} 100`}
+      preserveAspectRatio="none"
+      fill="currentColor"
+      data-hero-hide
+      aria-hidden="true"
+    >
+      {roots.map((root) => <rect x={root.x} width={root.width} height="100" data-hero-root />)}
+    </svg>
+  </div>
+
+  <div class="stripes" data-hero-hide aria-hidden="true">
+    <TStem animated />
+  </div>
+
+  <div class="side">
+    <ul class="verbs">
+      {home.heroWords.map((word) => <li>{word}</li>)}
+    </ul>
+    <a class="scroll label" href="#intro">
+      {home.scrollLabel}
+      <Arrow direction="down" />
+    </a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    flex: 1 0 auto;
+    grid-template-columns: minmax(0, 1fr) clamp(3.25rem, 16vw, 16rem);
+    grid-template-rows: auto 1fr auto;
+    width: 100%;
+    max-width: var(--frame);
+    margin-inline: auto;
+    padding-top: clamp(0.25rem, 0.6vw, 0.5rem);
+    background: var(--color-paper);
+  }
+
+  .crossbar {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: clamp(0.25rem, 0.6vw, 0.5rem);
+  }
+
+  .bar {
+    background: var(--color-ink);
+  }
+
+  .bar-1 {
+    height: clamp(1.25rem, 3.2vw, 3rem);
+  }
+
+  .bar-2 {
+    height: clamp(0.5rem, 1.2vw, 1.125rem);
+  }
+
+  .bar-3 {
+    height: clamp(0.375rem, 0.8vw, 0.75rem);
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .logotype {
+    width: 100%;
+    height: auto;
+  }
+
+  .letter {
+    fill: var(--color-ink);
+  }
+
+  .cut {
+    fill: var(--color-paper);
+  }
+
+  .band {
+    height: clamp(1.25rem, 3.2vw, 3rem);
+    background: var(--color-ink);
+  }
+
+  .lower-bar {
+    height: clamp(0.5rem, 1.2vw, 1.125rem);
+    margin-top: clamp(0.25rem, 0.6vw, 0.5rem);
+    background: var(--color-ink);
+  }
+
+  /* These lines and the stems to the right take up whatever height the screen leaves. */
+  .roots {
+    flex: 1 0 clamp(2.5rem, 5vw, 5rem);
+    width: 100%;
+    min-height: 0;
+  }
+
+  .side {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    /* Tall phones give the grey panel more of the screen. Short ones keep it at its content's size. */
+    min-height: 27vh;
+    min-height: 27svh;
+    padding: var(--space-lg) var(--gutter);
+    background: var(--color-paper-2);
+  }
+
+  .verbs {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: clamp(1rem, 0.85rem + 0.6vw, 1.25rem);
+    line-height: 1.7;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .verbs li:last-child {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .verbs li:last-child::after {
+    content: '';
+    width: 3.5rem;
+    height: 0.5rem;
+    background: currentColor;
+  }
+
+  .scroll {
+    align-self: flex-end;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2xs);
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    text-decoration: none;
+  }
+
+  .scroll :global(.arrow) {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  @media (hover: hover) {
+    .scroll:hover :global(.arrow) {
+      transform: translateY(4px);
+    }
+  }
+
+  @media (min-width: 52rem) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) clamp(8.5rem, 16vw, 16rem) clamp(13.5rem, 20vw, 19rem);
+      grid-template-rows: auto 1fr;
+    }
+
+    .side {
+      grid-column: auto;
+      min-height: 0;
+      flex-direction: column;
+      align-items: stretch;
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    .scroll {
+      justify-self: end;
+      margin-left: auto;
+    }
+  }
+</style>
