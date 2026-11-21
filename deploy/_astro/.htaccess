@@ -1,0 +1,4 @@
+# ファイル名にハッシュが付くビルド成果物なので、長期キャッシュしても更新は反映されます。
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=31536000, immutable"
+</IfModule>
