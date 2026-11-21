@@ -1,0 +1,15 @@
+# XServer Static の公開ディレクトリ直下に置く設定です(ビルドで deploy/.htaccess にコピーされます)。
+
+# 独自の404ページを表示する
+ErrorDocument 404 /404.html
+
+# http:// を https:// へ転送する
+# サーバーパネルの「SSL設定」で naga-t.jp のSSLを有効にしてからアップロードしてください。
+# 転送がループする(ERR_TOO_MANY_REDIRECTS)場合は、RewriteCond の行を
+#   RewriteCond %{HTTP:X-Forwarded-Proto} !https
+# に置き換えてください。
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !on
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>

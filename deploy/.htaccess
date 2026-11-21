@@ -1,0 +1,4 @@
+# XServer Static configuration
+
+# 独自の404ページを表示する
+ErrorDocument 404 /404.html

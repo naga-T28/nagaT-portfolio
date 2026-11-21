@@ -125,12 +125,14 @@ ssh -p <SSH_PORT> <SSH_USER>@<SSH_HOST> \
   'tar xzf ~/backup-public_html-<日時>.tar.gz -C <PUBLIC_HTML>'
 ```
 
-### `.htaccess` について(任意)
+### `.htaccess` について
 
-サイトは `.htaccess` がなくても動きます。ルートの `.htaccess` は既存の設定を壊さないよう、あえて同梱していません。次の2つを使いたい場合は、[xserver/htaccess.example](xserver/htaccess.example) を見ながら、サーバーの `.htaccess` に**追記**してください。
+[public/.htaccess](public/.htaccess) がビルドで `deploy/.htaccess` にコピーされます。次の2つを設定しています。
 
 - 独自の404ページ(`/404.html`)を表示する
 - `http://` を `https://` へ転送する(2026年11月の時点で、naga-t.jp の `http://` は転送されていません)
+
+アップロードの前に、サーバーパネルの「SSL設定」で naga-t.jp のSSLを有効にしてください。公開ディレクトリにすでに `.htaccess` がある場合は、上書きせず、中身を確認してから必要な部分だけ追記してください。上記の rsync コマンドはルートの `.htaccess` を除外しているので、SSHで公開する場合は別に転送してください。
 
 `deploy/_astro/.htaccess` は `_astro/` の中だけに効く長期キャッシュの設定で、そのままアップロードして構いません。
 
@@ -290,9 +292,8 @@ src/lib/         ロゴの座標、モールス符号の計算
 src/styles/      デザイントークンと共通CSS
 src/scripts/     メニュー、マーキー、GSAP
 src/assets/      フォント、プロフィール写真、プロジェクトの画面
-public/          そのままコピーされるファイル
+public/          そのままコピーされるファイル(.htaccess を含む)
 scripts/         検証、素材生成
-xserver/         サーバー設定の見本(ビルドに含まれません)
 deploy/          ビルド結果(Git管理外)
 ```
 

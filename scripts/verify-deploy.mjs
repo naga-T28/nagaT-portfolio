@@ -7,6 +7,7 @@ import { sound } from '../src/data/site.ts';
 const ROOT = resolve(fileURLToPath(new URL('../deploy/', import.meta.url)));
 const SITE = 'https://naga-t.jp';
 const REQUIRED = [
+  '.htaccess',
   'index.html',
   'about/index.html',
   'projects/index.html',
@@ -53,6 +54,9 @@ if (!existsSync(ROOT)) {
 }
 
 for (const path of REQUIRED) if (!existsSync(join(ROOT, path))) fail(`必須ファイルがありません: ${path}`);
+if (existsSync(join(ROOT, '.htaccess')) && !readFileSync(join(ROOT, '.htaccess'), 'utf8').includes('ErrorDocument 404 /404.html')) {
+  fail('.htaccess に 404 ページの設定がありません');
+}
 
 const files = walk(ROOT);
 for (const file of files) {
@@ -60,7 +64,6 @@ for (const file of files) {
   if (/\.(astro|ts|tsx|map|php)$/.test(name) || /(^|\/)(node_modules|src)\//.test(name) || name.endsWith('.DS_Store')) {
     fail(`公開すべきでないファイル: ${name}`);
   }
-  if (name === '.htaccess') fail('ルートの .htaccess は同梱しない方針です(サーバー側の設定を上書きするため)');
 }
 
 function resolveLocal(fromFile, reference) {
